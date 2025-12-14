@@ -1,0 +1,31 @@
+version: '3.9'
+
+services:
+  redis:
+    image: redis:6-alpine
+    container_name: own-temp-redis
+    ports:
+      - "6378:6378"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+    networks:
+      - own-network
+
+networks:
+  own-network:
+    driver: bridge
+
+volumes:
+  redis_data:
+    driver: local
+
+# docker-compose up -d, docker-compose down
+# show permission error pass command >> chmod +x ./node_modules/.bin/ts-node-dev
+
