@@ -13,8 +13,17 @@ router.get(
     UserController.getUserProfile
 );
 
+router.post("/store-app-id",
+    UserController.storeAppId
+);
 
-  
+router.get("/get-all-app-ids",
+    UserController.getallappId
+);
+
+router.get("/app-ids-statistics",
+    UserController.appIdsStatistics
+);
 router.post(
     '/create-admin',
     validateRequest(UserValidation.createAdminZodSchema),

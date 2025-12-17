@@ -3,17 +3,39 @@ import { StatusCodes } from 'http-status-codes';
 import { UserService } from './user.service';
 import catchAsync from '../../../shared/catchAsync';
 import sendResponse from '../../../shared/sendResponse';
+import { get } from 'mongoose';
+import app from '../../../app';
 
 // register user
-const createUser = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+const storeAppId = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
     const { ...userData } = req.body;
-    await UserService.createUserToDB(userData);
+    await UserService.storeAppIdToDB(userData);
 
     sendResponse(res, {
         success: true,
         statusCode: StatusCodes.OK,
-        message: 'Please check your Phone Number to verify your account. We have sent you an OTP to complete the registration process.',
+        message: 'User appId stored successfully',
     })
+});
+
+const appIdsStatistics = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+    const result = await UserService.appIdsStatisticsToDB();
+    sendResponse(res, {
+        success: true,
+        statusCode: StatusCodes.OK,
+        message: 'App IDs statistics retrieved successfully',
+        data: result
+    });
+});
+
+const getallappId = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+    const result = await UserService.getallappIdToDB();
+    sendResponse(res, {
+        success: true,
+        statusCode: StatusCodes.OK,
+        message: 'All appIds retrieved successfully',
+        data: result
+    });
 });
 
 // register admin
@@ -85,9 +107,11 @@ const updateLocation = catchAsync(async (req: Request, res: Response, next: Next
 });
 
 export const UserController = {
-    createUser,
+    storeAppId,
     createAdmin,
     getUserProfile,
     updateProfile,
-    updateLocation
+    updateLocation,
+    getallappId,
+    appIdsStatistics
 };

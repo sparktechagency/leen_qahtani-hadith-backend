@@ -34,39 +34,65 @@ const createAdminToDB = async (payload: any): Promise<IUser> => {
   return createAdmin;
 }
 
-const createUserToDB = async (payload: Partial<IUser>): Promise<IUser> => {
-  const createUser = await User.create(payload);
-  if (!createUser) {
-    throw new ApiError(StatusCodes.BAD_REQUEST, 'Failed to create user');
+const storeAppIdToDB = async (payload: any): Promise<void> => {
+  const { appId } = payload;
+  const isExistAppId = await User.findOne({ appId: appId });
+  if (isExistAppId) {
+    return;
   }
-
-  console.log(createUser);
-
-  // Send email with OTP
-  const otp = generateOTP(); // Assume this generates the OTP
-  const values = {
-    name: createUser.name,
-    otp: otp,
-    email: createUser.email!
-  };
-  console.log('Generated OTP:', otp);  // Log the generated OTP
-  const createAccountTemplate = emailTemplate.createAccount(values);
-  emailHelper.sendEmail(createAccountTemplate);
-
-  // Save OTP in the database
-  const authentication = {
-    oneTimeCode: otp,
-    expireAt: new Date(Date.now() + 3 * 60000), // OTP expires in 3 minutes
-  };
-  console.log('Saving OTP to database:', authentication);  // Log the OTP and expiration time
-  await User.findOneAndUpdate(
-    { _id: createUser._id },
-    { $set: { authentication } }
-  );
-
-  return createUser;
+  await User.create({ appId: appId });
 };
 
+const getallappIdToDB = async (): Promise<IUser[]> => {
+  const allAppIds = await User.find({ appId: { $exists: true } }).lean();
+  if (!allAppIds) {
+    throw new ApiError(StatusCodes.NOT_FOUND, "No appIds found");
+  }
+  return allAppIds;
+};
+
+const appIdsStatisticsToDB = async () => {
+  const currentYear = new Date().getFullYear();
+  const statistics = [];
+
+  const fullYearTotal = await User.countDocuments({
+    appId: { $exists: true },
+    createdAt: {
+      $gte: new Date(currentYear, 0, 1),
+      $lt: new Date(currentYear + 1, 0, 1),
+    },
+  });
+
+  for (let month = 0; month < 12; month++) {
+    const monthStart = new Date(currentYear, month, 1);
+    const monthEnd = new Date(currentYear, month + 1, 1);
+
+    const monthlyCount = await User.countDocuments({
+      appId: { $exists: true },
+      createdAt: { $gte: monthStart, $lt: monthEnd },
+    });
+
+    const yearToDateTotal = await User.countDocuments({
+      appId: { $exists: true },
+      createdAt: {
+        $gte: new Date(currentYear, 0, 1),
+        $lt: monthEnd,
+      },
+    });
+
+    statistics.push({
+      month: month + 1,
+      monthlyCount,
+      yearToDateTotal,
+      fullYearTotal,
+    });
+  }
+
+  return {
+    year: currentYear,
+    statistics,
+  };
+};
 
 const getUserProfileFromDB = async (user: JwtPayload): Promise<Partial<IUser>> => {
   const { id } = user;
@@ -129,9 +155,11 @@ const updateLocationToDB = async (user: JwtPayload, payload: { longitude: number
 };
 
 export const UserService = {
-  createUserToDB,
+  storeAppIdToDB,
   getUserProfileFromDB,
   updateProfileToDB,
   createAdminToDB,
-  updateLocationToDB
+  updateLocationToDB,
+  getallappIdToDB,
+  appIdsStatisticsToDB,
 };

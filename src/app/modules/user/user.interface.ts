@@ -39,6 +39,7 @@ export type IUser = {
         expireAt: Date;
     };
     accountInformation?: IStripeAccountInfo;
+    createdAt?: Date;
 }
 
 export type UserModal = {
