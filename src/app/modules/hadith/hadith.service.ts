@@ -18,6 +18,11 @@ import { Hadith } from "./hadith.model";
     return hadiths;
 };
 
+const gethadithByIdFromDB = async (id: string): Promise<Ihadith | null> => {
+    const hadith = await Hadith.findById(id).populate('category');
+    return hadith;
+};
+
  const getHadithByCategoryFromDB = async (category: string): Promise<Ihadith[]> => {
     const hadiths = await Hadith.find({ category }).sort({ createdAt: -1 }).populate('category');
     return hadiths;
@@ -65,6 +70,7 @@ export const HadithService = {
     getAllHadithFromDB,
     getHadithByCategoryFromDB,
     getHadithByDailyFromDB,
+    gethadithByIdFromDB,
     updateHadithToDB,
     deleteHadithFromDB,
     status

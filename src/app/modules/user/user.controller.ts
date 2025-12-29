@@ -6,7 +6,6 @@ import sendResponse from '../../../shared/sendResponse';
 import { get } from 'mongoose';
 import app from '../../../app';
 
-// register user
 const storeAppId = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
     const { ...userData } = req.body;
     await UserService.storeAppIdToDB(userData);
@@ -19,7 +18,9 @@ const storeAppId = catchAsync(async (req: Request, res: Response, next: NextFunc
 });
 
 const appIdsStatistics = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-    const result = await UserService.appIdsStatisticsToDB();
+    const year = req.query.year ? parseInt(req.query.year as string) : undefined;
+    const result = await UserService.appIdsStatisticsToDB(year);
+    
     sendResponse(res, {
         success: true,
         statusCode: StatusCodes.OK,

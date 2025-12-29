@@ -46,6 +46,9 @@ router.get("/by-category/:category",
 router.get("/by-daily",
     HadithController.getHadithByDaily
 )
+router.get("/:id",
+    HadithController.gethadithById
+);
 router.patch(
     "/:id",
     auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN),

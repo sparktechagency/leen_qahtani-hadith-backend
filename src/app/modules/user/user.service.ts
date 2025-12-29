@@ -51,31 +51,32 @@ const getallappIdToDB = async (): Promise<IUser[]> => {
   return allAppIds;
 };
 
-const appIdsStatisticsToDB = async () => {
-  const currentYear = new Date().getFullYear();
+const appIdsStatisticsToDB = async (year?: number) => {
+  const selectedYear = year || new Date().getFullYear();
   const statistics = [];
 
   const fullYearTotal = await User.countDocuments({
     appId: { $exists: true },
     createdAt: {
-      $gte: new Date(currentYear, 0, 1),
-      $lt: new Date(currentYear + 1, 0, 1),
+      $gte: new Date(selectedYear, 0, 1),
+      $lt: new Date(selectedYear + 1, 0, 1),
     },
   });
 
   for (let month = 0; month < 12; month++) {
-    const monthStart = new Date(currentYear, month, 1);
-    const monthEnd = new Date(currentYear, month + 1, 1);
+    const monthStart = new Date(selectedYear, month, 1);
+    const monthEnd = new Date(selectedYear, month + 1, 1);
 
     const monthlyCount = await User.countDocuments({
       appId: { $exists: true },
       createdAt: { $gte: monthStart, $lt: monthEnd },
     });
 
+    // Fixed: yearToDateTotal should use selectedYear, not currentYear
     const yearToDateTotal = await User.countDocuments({
       appId: { $exists: true },
       createdAt: {
-        $gte: new Date(currentYear, 0, 1),
+        $gte: new Date(selectedYear, 0, 1), // Changed from currentYear to selectedYear
         $lt: monthEnd,
       },
     });
@@ -89,7 +90,7 @@ const appIdsStatisticsToDB = async () => {
   }
 
   return {
-    year: currentYear,
+    year: selectedYear, // Changed from currentYear to selectedYear
     statistics,
   };
 };

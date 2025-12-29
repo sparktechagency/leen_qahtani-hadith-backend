@@ -26,6 +26,17 @@ const getAllHadith = catchAsync(async (req: Request, res: Response) => {
     });
 })
 
+const gethadithById = catchAsync(async (req: Request, res: Response) => {
+    const id = req.params.id;
+    const result = await HadithService.gethadithByIdFromDB(id);
+    sendResponse<Ihadith | null>(res, {
+        success: true,
+        statusCode: StatusCodes.OK,
+        message: `Hadith retrieved successfully for id: ${id}`,
+        data: result
+    });
+});
+
 const getHadithByDaily = catchAsync(async (req: Request, res: Response) => {
     const dailyQuery = req.query.daily;
     const daily = dailyQuery === "true";
@@ -88,6 +99,7 @@ const status = catchAsync(async (req: Request, res: Response) => {
 export const HadithController = {
     createHadith,
     getAllHadith,
+    gethadithById,
     getHadithByCategory,
     getHadithByDaily,
     updateHadith,
