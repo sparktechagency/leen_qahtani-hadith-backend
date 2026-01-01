@@ -16,6 +16,10 @@ import { IhadithModel, Ihadith } from "./hadith.interface";
       type: Boolean,
       default: false,
     },
+    hadith: {
+      type: String,
+      required: false,
+    },
     description: {
       type: String,
       required: false,
