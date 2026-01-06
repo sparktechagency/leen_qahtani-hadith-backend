@@ -41,7 +41,6 @@ export async function setupProcessHandlers() {
         await gracefulShutdown('SIGUSR2');
     });
 
-    // Handle warnings
     process.on('warning', (warning) => {
         logger.warn(colors.yellow(`⚠️ Worker ${processId} Warning:`), warning.name, warning.message);
     });
